@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-netlens": ["../src/index"],
+      "expo-netlens/*": ["../src/*"]
+    }
+  }
+}
