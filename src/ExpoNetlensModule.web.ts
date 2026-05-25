@@ -1,15 +1,14 @@
-import { registerWebModule, NativeModule } from 'expo';
-
-import { ExpoNetlensModuleEvents } from './ExpoNetlens.types';
-
-class ExpoNetlensModule extends NativeModule<ExpoNetlensModuleEvents> {
-  PI = Math.PI;
-  async setValueAsync(value: string): Promise<void> {
-    this.emit('onChange', { value });
-  }
-  hello() {
-    return 'Hello world! 👋';
-  }
-}
-
-export default registerWebModule(ExpoNetlensModule, 'ExpoNetlensModule');
+export default {
+  isRunning(): boolean {
+    return false;
+  },
+  getRecordCount(): number {
+    return 0;
+  },
+  async startNativeInterception(): Promise<void> {
+    // No-op on web — native interception is not available
+  },
+  async stopNativeInterception(): Promise<void> {
+    // No-op on web
+  },
+};

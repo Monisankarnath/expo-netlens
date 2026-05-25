@@ -28,15 +28,15 @@
   "author": "Monisankar Nath <monisankar.nath161998@gmail.com> (https://github.com/Monisankarnath)",
   "license": "MIT",
   "homepage": "https://github.com/Monisankarnath/expo-netlens.git#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "~19.1.1",
-    "expo-module-scripts": "^55.0.2",
     "expo": "^55.0.8",
+    "expo-module-scripts": "^55.0.2",
     "react-native": "0.82.1"
   },
   "peerDependencies": {
     "expo": "*",
+    "expo-clipboard": "^55.0.9",
     "react": "*",
     "react-native": "*"
   }

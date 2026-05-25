@@ -1,48 +1,48 @@
 import ExpoModulesCore
 
 public class ExpoNetlensModule: Module {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  public func definition() -> ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoNetlens')` in JavaScript.
-    Name("ExpoNetlens")
+    private var interceptorActive = false
+    private var nativeRecordCount = 0
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Double.pi
-    }
+    public func definition() -> ModuleDefinition {
+        Name("ExpoNetlens")
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+        // --- Sync functions (JSI — zero overhead on New Arch) ---
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { (value: String) in
-      // Send an event to JavaScript.
-      self.sendEvent("onChange", [
-        "value": value
-      ])
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of the
-    // view definition: Prop, Events.
-    View(ExpoNetlensView.self) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { (view: ExpoNetlensView, url: URL) in
-        if view.webView.url != url {
-          view.webView.load(URLRequest(url: url))
+        Function("isRunning") { [weak self] () -> Bool in
+            return self?.interceptorActive ?? false
         }
-      }
 
-      Events("onLoad")
+        Function("getRecordCount") { [weak self] () -> Int in
+            return self?.nativeRecordCount ?? 0
+        }
+
+        // --- Async functions (I/O) ---
+
+        AsyncFunction("startNativeInterception") { [weak self] () in
+            guard let self = self else { return }
+            guard !self.interceptorActive else { return }
+            self.interceptorActive = true
+            // Phase 2: start URLProtocol interception + log capture here
+        }
+
+        AsyncFunction("stopNativeInterception") { [weak self] () in
+            guard let self = self else { return }
+            guard self.interceptorActive else { return }
+            self.interceptorActive = false
+            self.nativeRecordCount = 0
+            // Phase 2: stop URLProtocol interception + log capture here
+        }
+
+        // --- Events (JSI dispatch on New Arch — low latency) ---
+        // Phase 2: these will be emitted by NativeTrafficInterceptor and NativeLogCapture
+        Events("onNativeTraffic", "onNativeLog", "onShake")
+
+        // --- Lifecycle ---
+
+        OnDestroy {
+            self.interceptorActive = false
+            self.nativeRecordCount = 0
+        }
     }
-  }
 }

@@ -1,12 +1,20 @@
-import { NativeModule, requireNativeModule } from 'expo';
+import { requireNativeModule } from 'expo-modules-core';
 
-import { ExpoNetlensModuleEvents } from './ExpoNetlens.types';
-
-declare class ExpoNetlensModule extends NativeModule<ExpoNetlensModuleEvents> {
-  PI: number;
-  hello(): string;
-  setValueAsync(value: string): Promise<void>;
+interface IExpoNetlensModule {
+  isRunning(): boolean;
+  getRecordCount(): number;
+  startNativeInterception(): Promise<void>;
+  stopNativeInterception(): Promise<void>;
 }
 
-// This call loads the native module object from the JSI.
-export default requireNativeModule<ExpoNetlensModule>('ExpoNetlens');
+// The native module will be fully implemented in Phase 2-3.
+// For Phase 1, we only need the module to exist for the build to work.
+let ExpoNetlensModule: IExpoNetlensModule | null = null;
+
+try {
+  ExpoNetlensModule = requireNativeModule<IExpoNetlensModule>('ExpoNetlens');
+} catch {
+  // Native module not available (e.g., web, or not linked)
+}
+
+export default ExpoNetlensModule;
